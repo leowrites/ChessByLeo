@@ -142,8 +142,8 @@ public class Game {
     //black bishop
     static int[] bishopc8Pos = {2, 0};
     static int[] bishopf8Pos = {5, 0};
-    static Pieces blackBishopc8 = new Bishop(bishopc8Pos, "[blackBishopc8]", white, black);
-    static Pieces blackBishopf8 = new Bishop(bishopf8Pos, "[blackBishopc8]", white, black);
+    static Pieces blackBishopc8 = new Bishop(bishopc8Pos, "[blackBishopc8]", black, white);
+    static Pieces blackBishopf8 = new Bishop(bishopf8Pos, "[blackBishopc8]", black, white);
     //white rook
     static int[] rooka1Pos = {0, 7};
     static int[] rookh1Pos = {7, 7};

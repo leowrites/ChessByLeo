@@ -14,9 +14,11 @@ import javax.imageio.*;
 /*
 This is the panel where the game will take place
 
-
+TODO 2020-12-07: implement game loop and new game option
+                 Rethink check mechanism in Game class.
+                 implement turn mechanism - done
 TODO 2020-12-06: debug bishop and rook - done
-                 Implement some method that shows what the user is selecting - have the selectedIcons added to the buttons
+                 Implement some method that shows what the user is selecting - have the selectedIcons added to the buttons - done
 TODO 2020-12-05: Integration of the graphics with the backend rules
                  Included all images
                  Integration complete
@@ -43,6 +45,8 @@ public class Application extends JFrame {
     //because they belong to that one specific button, I need to take these two out side of the class so they are not instance specific
 
     private boolean hasPiece = true;
+
+    private String turn = "white";
 
     private final ChessSquareButton[][] squares = new ChessSquareButton[8][8];
 
@@ -104,7 +108,7 @@ public class Application extends JFrame {
                         squares[y][x].setBackground(new Color(103, 101, 47));
                     } else {
                         squares[y][x] = new ChessSquareButton(Game.blackPiecesObjects.get(x), blackIcons.get(x), blackSelected.get(x));
-                        squares[y][x].setBackground(new Color(255, 255, 255));
+                        squares[y][x].setBackground(new Color(241, 245, 233));
                     }
                 }
                 if (y == 1) {
@@ -113,7 +117,7 @@ public class Application extends JFrame {
                         squares[y][x].setBackground(new Color(103, 101, 47));
                     } else {
                         squares[y][x] = new ChessSquareButton(Game.blackPiecesObjects.get(x + 8), blackPawnIcon, blackPawnSelected);
-                        squares[y][x].setBackground(new Color(255, 255, 255));
+                        squares[y][x].setBackground(new Color(241, 245, 233));
                     }
                 } else if (y >= 2 && y <= 5) {
                     if ((x + y) % 2 != 0) {
@@ -121,7 +125,7 @@ public class Application extends JFrame {
                         squares[y][x].setBackground(new Color(103, 101, 47));
                     } else {
                         squares[y][x] = new ChessSquareButton();
-                        squares[y][x].setBackground(new Color(255, 255, 255));
+                        squares[y][x].setBackground(new Color(241, 245, 233));
                     }
                 }
                 if (y == 6) {
@@ -130,7 +134,7 @@ public class Application extends JFrame {
                         squares[y][x].setBackground(new Color(103, 101, 47));
                     } else {
                         squares[y][x] = new ChessSquareButton(Game.whitePiecesObjects.get(x + 8), whitePawnIcon, whitePawnSelected);
-                        squares[y][x].setBackground(new Color(255, 255, 255));
+                        squares[y][x].setBackground(new Color(241, 245, 233));
                     }
                 }
                 if (y == 7) {
@@ -139,7 +143,7 @@ public class Application extends JFrame {
                         squares[y][x].setBackground(new Color(103, 101, 47));
                     } else {
                         squares[y][x] = new ChessSquareButton(Game.whitePiecesObjects.get(x), whiteIcons.get(x), whiteSelected.get(x));
-                        squares[y][x].setBackground(new Color(255, 255, 255));
+                        squares[y][x].setBackground(new Color(241, 245, 233));
                     }
                 }
                 squares[y][x].setOpaque(true);
@@ -236,16 +240,70 @@ public class Application extends JFrame {
                     if (squares[y][x] == source) {
                         if (currentPos == null) {   //first Click
                             currentPos = new int[]{x, y};
-                            if (thisPiece == null) {    //if empty
-                                hasPiece = false;
-                            }else{  //if not empty
-                                setIcon(selected);
+                            if (thisPiece == null) {
+                                currentPos = null;
+
                             }
-                        } else {    //second click
+                            else if (thisPiece.thisPlayer.side.equals(turn)) {
+
+                                setIcon(selected);
+
+                            }
+
+                        }else {    //second click
+
                             targetPos = new int[]{x, y};
-                            process();
-                            currentPos = null;  //erase currentPos
-                            hasPiece = true;
+
+                            if (turn.equals("white")){
+                                if (squares[currentPos[1]][currentPos[0]].thisPiece.thisPlayer.side.equals("white")){
+                                    //if it clicks itself
+                                    if (squares[currentPos[1]][currentPos[0]] == squares[targetPos[1]][targetPos[0]] ){ //if it's the same square, it means to cancel the selecting
+
+                                        squares[currentPos[1]][currentPos[0]].setIcon(squares[currentPos[1]][currentPos[0]].notSelected);
+
+                                        currentPos = null;
+
+                                    }else if (!squares[currentPos[1]][currentPos[0]].thisPiece.isLegal(currentPos, targetPos)) {  // if not a legal move
+
+                                        squares[currentPos[1]][currentPos[0]].setIcon(squares[currentPos[1]][currentPos[0]].notSelected);
+
+                                        currentPos = null;
+
+                                    }
+                                    else {
+                                        process();
+                                    }
+                                }
+                                else{
+                                    squares[currentPos[1]][currentPos[0]].setIcon(squares[currentPos[1]][currentPos[0]].notSelected);
+                                    currentPos = null;
+                                }
+                            }
+                            else if (turn.equals("black")){
+
+                                if (squares[currentPos[1]][currentPos[0]].thisPiece.thisPlayer.side.equals("black")) {
+
+                                    if (squares[currentPos[1]][currentPos[0]] == squares[targetPos[1]][targetPos[0]]) { //if it's the same square, it means to cancel the selecting
+
+                                        squares[currentPos[1]][currentPos[0]].setIcon(squares[currentPos[1]][currentPos[0]].notSelected);
+
+                                        currentPos = null;
+
+                                    } else if (!squares[currentPos[1]][currentPos[0]].thisPiece.isLegal(currentPos, targetPos)) {  // if not a legal move
+
+                                        squares[currentPos[1]][currentPos[0]].setIcon(squares[currentPos[1]][currentPos[0]].notSelected);
+
+                                        currentPos = null;
+
+                                    }else {
+                                        process();
+                                        turn = "white";
+                                    }
+                                }else{
+                                        squares[currentPos[1]][currentPos[0]].setIcon(squares[currentPos[1]][currentPos[0]].notSelected);
+                                        currentPos = null;
+                                    }
+                            }
                         }
                     }
                 }
@@ -253,21 +311,7 @@ public class Application extends JFrame {
         }
 
         public void process() {
-
-            if (hasPiece) {    //if the original square has a piece
-
-                if (squares[currentPos[1]][currentPos[0]] == squares[targetPos[1]][targetPos[0]] ){ //if it's the same square, it means to cancel the selecting
-
-                    this.setIcon(notSelected);
-
-                    return;
-                }
-
-                if (!squares[currentPos[1]][currentPos[0]].thisPiece.isLegal(currentPos, targetPos)) {  // if not a legal move
-                    squares[currentPos[1]][currentPos[0]].setIcon(squares[currentPos[1]][currentPos[0]].notSelected);
-                    return;
-
-                }
+    //if the original square has a piece
 
                 //if it's a legal move
                 this.notSelected = squares[currentPos[1]][currentPos[0]].notSelected;   //give the notSelected icon to the new square
@@ -280,7 +324,9 @@ public class Application extends JFrame {
                 squares[currentPos[1]][currentPos[0]].thisPiece = null; //erase the old piece information
                 thisPiece.setPosition(targetPos);
 
+                currentPos = null;  //erase currentPos
+                hasPiece = true;
+                turn = "black";
             }
-        }
     }
 }
