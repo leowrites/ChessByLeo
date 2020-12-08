@@ -623,6 +623,7 @@ class King extends Pieces { //Began 2020-11-28
     final Player thisPlayer;
     final Player enemyPlayer;
     String side;
+    boolean checkStatus = false;
 
     King(int[] position, String name, Player thisPlayer, Player enemeyPlayer) {
         super(position, name, thisPlayer, enemeyPlayer);
@@ -648,6 +649,7 @@ class King extends Pieces { //Began 2020-11-28
         boolean cond6 = currentX == targetX && currentY - 1 == targetY;
         boolean cond7 = currentX + 1 == targetX && currentY == targetY;
         boolean cond8 = currentX - 1 == targetX && currentY == targetY;
+
         if (cond1 || cond2 || cond3 || cond4 | cond5 || cond6 | cond7 || cond8) {
             //King movement
                 if (Board.Occupied(targetX,targetY)){

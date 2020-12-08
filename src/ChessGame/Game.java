@@ -14,9 +14,13 @@ public class Game {
      * AUTHOR Leo
      * Write a functional chess engine
      * <p>
+     * 2020-12-08
+     * TODO:
+     *      Begin check and checkmate mechanism - Done
+     *      Implement the check and debug the methods
      * 2020-12-06
      * TODO:
-     *      Rewrite code for turns, specifically in setPosition()
+     *      Rewrite code for turns, specifically in setPosition() - done
      *      Possibly delete all the check mechanism for now - there is back up for that. Make sure all the piece can move first
      *      Pawn, knight and bishop debug complete
      *      Finish King today or tmr
@@ -80,17 +84,10 @@ public class Game {
    16 pieces(an abstract class) on each side
    turns where players can move their pieces
     */
-    static boolean gameState = true;
     static String whitePlayerName;
     static String blackPlayerName;
-    static String[] whitePieces = {"[whitePawn1]", "[whitePawn2]", "[whitePawn3]", "[whitePawn4]", "[whitePawn5]",
-            "[whitePawn6]", "[whitePawn7]", "[whitePawn8]", "[whiteRooka1]", "[whiteKnightb1]", "[whiteBishopc1]",
-            "[whiteQueen]", "[whiteKing]", "[whiteBishopf1]", "[whiteKnightg1]", "[whiteRookh1]"};
-    static String[] blackPieces = {"[blackRooka8]", "[blackKnightb8]", "[blackBishopc8]", "[blackQueen]", "[blackKing]",
-            "[blackBishopf8]", "[blackKnightg8]", "[blackRookh8]", "[blackPawn1]",
-            "[blackPawn2]", "[blackPawn3]", "[blackPawn4]", "[blackPawn5]", "[blackPawn6]", "[blackPawn7]", "[blackPawn8]"};
-    static Player white = new Player(whitePlayerName, "white", whitePieces);
-    static Player black = new Player(blackPlayerName, "black", blackPieces);
+    static Player white = new Player(whitePlayerName, "white");
+    static Player black = new Player(blackPlayerName, "black");
     static int[] whitePawn1Pos = {0, 6};
     static int[] whitePawn2Pos = {1, 6};
     static int[] whitePawn3Pos = {2, 6};
@@ -168,8 +165,21 @@ public class Game {
     static King blackKing = new King(blackKingPos, "[blackKing]", black, white);
     static ArrayList<Pieces> blackPiecesObjects = new ArrayList<>();
     static ArrayList<Pieces> whitePiecesObjects = new ArrayList<>();
-    static ArrayList<Pieces> whiteObjectChecking = new ArrayList<>();
-    static ArrayList<Pieces> blackObjectChecking = new ArrayList<>();
+
+    ArrayList<int[]> whitePossibleMoves = new ArrayList<>();
+    ArrayList<int[]> blackPossibleMoves = new ArrayList<>();
+    int whitePossibility = 0;
+    int blackPossibility = 0;
+    ArrayList<int[]> whiteKingPossibleMoves = new ArrayList<>();
+    ArrayList<int[]> blackKingPossibleMoves = new ArrayList<>();
+    int AmountOfWhiteKingPossibleMoves = 0;
+    int AmountOfBlackKingPossibleMoves = 0;
+    ArrayList<int[]> whiteMoveStopCheck = new ArrayList<>();
+    ArrayList<int[]> blackMoveStopCheck = new ArrayList<>();
+    int amountOfWhiteStopCheck = 0;
+    int amountOfBlackStopCheck = 0;
+    int blackTotalPossibility = 0;
+    int whiteTotalPossibility = 0;
 
 
     public void initialization() {
@@ -181,8 +191,11 @@ public class Game {
                 blackPawn1, blackPawn2, blackPawn3, blackPawn4, blackPawn5, blackPawn6, blackPawn7, blackPawn8));
         whitePiecesObjects.addAll(Arrays.asList(whiteRooka1, whiteKnightb1, whiteBishopc1, whiteQueen, whiteKing, whiteBishopf1, whiteKnightg1, whiteRookh1,
                 whitePawn1, whitePawn2, whitePawn3, whitePawn4, whitePawn5, whitePawn6, whitePawn7, whitePawn8));
-        white.setPiecesAlive(whitePieces);
-        black.setPiecesAlive(blackPieces);
+        white.setPieces(whitePiecesObjects);
+        black.setPieces(blackPiecesObjects);
+        white.setPiecesAlive(whitePiecesObjects);
+        black.setPiecesAlive(blackPiecesObjects);
+
         /*try {
             Thread.sleep(5000);
         } catch (InterruptedException exception) {
@@ -195,96 +208,312 @@ public class Game {
         //white pawn
     }
 
-    void gamePhase(Player white, Player black, boolean gameSituation) {
-        // ** java object names cannot be specified at run time
-        //looking into interface map
-        // I can ask what piece the user want to move, and use a switch case to move that piece
-        // or is there some other way...?
+    public void check(Player thisPlayer) {
+
+        if (Application.turn.equals("white")) {
+
+            for (Pieces piece : thisPlayer.getPiecesAlive()) {
+
+                for (int y = 0; y < 8; y++) {
+
+                    for (int x = 0; x < 8; x++) {
+
+                        int[] currentPos = {piece.x, piece.y};
+
+                        int[] targetPos = {x, y};
+
+                        if (piece.isLegal(currentPos, targetPos)) {
+
+                            System.out.println("Checking " + piece.name + "possible position:" + Arrays.toString(targetPos));
+
+                            whitePossibleMoves.add(targetPos);
+
+                        }
+
+                    }
+                }
+
+            }
+            for (int[] possibility : whitePossibleMoves) {
+
+                System.out.println("Checking position " + Arrays.toString(possibility));
+
+                if (Game.blackKing.getCurrentPos() == possibility) {
+
+                    System.out.println("Position " + Arrays.toString(possibility) + " puts white King in check");
+
+                    whitePossibility++;
+
+                    blackKing.checkStatus = true;
+
+
+                }
+                if (whitePossibility == 0) {
+
+                    System.out.println("white King is not in check");
+
+                    blackKing.checkStatus = false;
+
+                }
+            }
+
+        }
+
+        if (Application.turn.equals("black")) {
+
+            for (Pieces piece : thisPlayer.getPiecesAlive()) {
+
+                for (int y = 0; y < 8; y++) {
+
+                    for (int x = 0; x < 8; x++) {
+
+                        int[] currentPos = {piece.x, piece.y};
+
+                        int[] targetPos = {x, y};
+
+                        if (piece.isLegal(currentPos, targetPos)) {
+
+                            System.out.println("Checking " + piece.name + " possible position: " + Arrays.toString(targetPos));
+
+                            blackPossibleMoves.add(targetPos);
+
+                        }
+
+                    }
+                }
+
+            }
+            for (int[] possibility : blackPossibleMoves) {
+
+                System.out.println("Checking position " + Arrays.toString(possibility));
+
+                if (blackKing.getCurrentPos() == possibility) {
+
+                    System.out.println("Position " + Arrays.toString(possibility) + " puts black King in check");
+
+                    blackPossibility++;
+
+                    blackKing.checkStatus = true;
+
+
+                }
+                if (blackPossibility == 0) {
+
+                    System.out.println("black King is not in check");
+
+                    blackKing.checkStatus = false;
+
+                }
+            }
+
+        }
+
     }
 
-    static boolean whiteCheck(King whiteKing) {
-        /*
-        this function checks if white is being checked by black
-         */
-        for (Pieces blackPiecesObject : blackPiecesObjects) {
-            //OMW You can iterate through objects and its attributes
-            int[] objectCurrentPos = new int[2];
-            objectCurrentPos[0] = blackPiecesObject.x;
-            objectCurrentPos[1] = blackPiecesObject.y;
-            int[] whiteKingPos = new int[2];
-            whiteKingPos[0] = whiteKing.x;
-            whiteKingPos[1] = whiteKing.y;
-            //if the position King is going is legal for the other side
-            if (blackPiecesObject.isLegal(objectCurrentPos, whiteKingPos)) {
-                blackObjectChecking.add(blackPiecesObject);
-                return true;
-            }
-        }
-        if (!blackObjectChecking.isEmpty()) {
-            for (Pieces noLongerChecking : blackObjectChecking) {
-                int[] objectCurrentPos = new int[2];
-                objectCurrentPos[0] = noLongerChecking.x;
-                objectCurrentPos[1] = noLongerChecking.y;
-                int[] whiteKingPos = new int[2];
-                whiteKingPos[0] = whiteKing.x;
-                whiteKingPos[1] = whiteKing.y;
-                if (!noLongerChecking.isLegal(objectCurrentPos, whiteKingPos)) {
-                    blackObjectChecking.remove(noLongerChecking);
+    public boolean response() {
+
+        boolean gameOver = false;
+
+        if (Application.turn.equals("white")) {
+
+            while (whiteKing.checkStatus) {
+
+                for (int y = 0; y < 8; y++) {
+
+                    for (int x = 0; x < 8; x++) {
+
+                        int[] targetPos = {x, y};
+
+                        if (whiteKing.isLegal(whiteKing.getCurrentPos(), targetPos)) {
+
+                            whiteKingPossibleMoves.add(targetPos);
+
+                        }
+                    }
+                }
+
+                System.out.println("All the white king's possible positions are: " + whiteKingPossibleMoves);
+
+                for (int[] possibility : whiteKingPossibleMoves) {   //every king possible move
+
+                    for (int[] blackPossibleMoves : blackPossibleMoves) {
+
+                        if (possibility == blackPossibleMoves) {
+
+                            System.out.println("");
+
+                            whitePossibleMoves.remove(possibility); //remove if a white piece can get to that position
+
+                            AmountOfWhiteKingPossibleMoves ++;
+
+                        }
+
+                    }
+
+                }
+
+                System.out.println("White king can only move to " + whitePossibleMoves);
+
+                for (int[] possibility : whitePossibleMoves) {   //every possible move for black piece
+                    //save the board first, also every possible move from before
+                    Board.setSavedBoard(Board.board);
+                    Board.setSavedBoardString(Board.boardString);
+                    ArrayList<int[]> savedWhitePossibleMoves = whitePossibleMoves;  //so we can reverse back
+                    int savedWhitePossibility = whitePossibility;
+                    ArrayList<int[]> savedBlackPossibleMoves = blackPossibleMoves;  //so we can reverse back
+                    int savedBlackPossibilities = blackPossibility;
+                    System.out.println("Board saved: " + Arrays.deepToString(Board.savedBoardString));
+                    System.out.println("White move saved: " + savedBlackPossibleMoves);
+                    System.out.println("White have: " + savedBlackPossibilities + " before theoretical positions check");
+
+                    for (Pieces piece : white.piecesAlive) { //for each black piece alive
+
+                        if (piece.isLegal(piece.getCurrentPos(), possibility)) { // if the piece can move to that possibility
+
+                            piece.setPosition(possibility); //move the piece
+                            //call check
+                            Application.turn = "black";
+                            check(white);
+                            Application.turn = "white";
+                            //reset the board
+
+                            if (!whiteKing.checkStatus) { //if white is no longer checking black
+
+                                whiteMoveStopCheck.add(possibility);    //add that possibility to the inventory
+
+                                amountOfWhiteStopCheck++;   //increase the possibilities black has to stop the check
+
+                                System.out.println("Moving " + piece.name + "to position " + Arrays.toString(possibility) +
+                                        " will stop black from checking white");
+                                System.out.println("Current black possible moves are: " + blackPossibleMoves);
+                                System.out.println("Current amount of black possibilities are: " + blackPossibility);
+                            }
+
+                            System.out.println("White has " + amountOfWhiteStopCheck + " moves");
+                            whiteKing.checkStatus = true;
+                            Board.board = Board.savedBoard;
+                            Board.boardString = Board.savedBoardString;
+                            blackPossibleMoves = savedBlackPossibleMoves;
+                            blackPossibility = savedBlackPossibilities;
+                            System.out.println("Board reversed to " + Arrays.deepToString(Board.boardString));
+                            System.out.println("Black possible moves reversed to " + blackPossibleMoves);
+                            System.out.println("Amount of black possibility checking the king reversed to " + blackPossibility);
+
+                        }
+                    }
                 }
             }
         }
-        return false;
-    }
 
-    static boolean blackCheck(King blackKing) {
-        for (Pieces whitePiecesObject : Game.whitePiecesObjects) {
-            //OMW You can iterate through objects and its attributes
-            int[] objectCurrentPos = new int[2];
-            objectCurrentPos[0] = whitePiecesObject.x;
-            objectCurrentPos[1] = whitePiecesObject.y;
-            int[] blackKingPos = new int[2];
-            blackKingPos[0] = blackKing.x;
-            blackKingPos[1] = blackKing.y;
-            //if the position King is going is legal for the other side
-            //if the position King is going is legal for the other side
-            if (whitePiecesObject.isLegal(objectCurrentPos, blackKingPos)) { //iterated pieces after the check and made true false
-                whiteObjectChecking.add(whitePiecesObject);
-                return true;
+        if (Application.turn.equals("black")) {
+
+            while (blackKing.checkStatus) {
+
+                for (int y = 0; y < 8; y++) {
+
+                    for (int x = 0; x < 8; x++) {
+
+                        int[] targetPos = {x, y};
+
+                        if (blackKing.isLegal(blackKing.getCurrentPos(), targetPos)) {
+
+                            blackKingPossibleMoves.add(targetPos);
+
+                        }
+                    }
+                }
+
+                System.out.println("All the black king's possible positions are: " + blackKingPossibleMoves);
+
+                for (int[] possibility : blackKingPossibleMoves) {   //every king possible move
+
+                    for (int[] whitePossibleMove : whitePossibleMoves) {
+
+                        if (possibility == whitePossibleMove) {
+
+                            System.out.println("");
+
+                            blackKingPossibleMoves.remove(possibility); //remove if a white piece can get to that position
+
+                            AmountOfBlackKingPossibleMoves ++;
+
+                        }
+
+                    }
+
+                }
+
+                System.out.println("Black king can only move to " + blackKingPossibleMoves);
+
+                for (int[] possibility : blackPossibleMoves) {   //every possible move for black piece
+                    //save the board first, also every possible move from before
+                    Board.setSavedBoard(Board.board);
+                    Board.setSavedBoardString(Board.boardString);
+                    ArrayList<int[]> savedWhitePossibleMoves = whitePossibleMoves;  //so we can reverse back
+                    int savedWhitePossibility = whitePossibility;
+                    System.out.println("Board saved: " + Arrays.deepToString(Board.savedBoardString));
+                    System.out.println("White move saved: " + savedWhitePossibleMoves);
+                    System.out.println("White have: " + savedWhitePossibility + " before theoretical positions check");
+
+                    for (Pieces piece : black.piecesAlive) { //for each black piece alive
+
+                        if (piece.isLegal(piece.getCurrentPos(), possibility)) { // if the piece can move to that possibility
+
+                            piece.setPosition(possibility); //move the piece
+                            //call check
+                            Application.turn = "white";
+                            check(white);
+                            Application.turn = "black";
+                            //reset the board
+
+                            if (!blackKing.checkStatus) { //if white is no longer checking black
+
+                                blackMoveStopCheck.add(possibility);    //add that possibility to the inventory
+
+                                amountOfBlackStopCheck++;   //increase the possibilities black has to stop the check
+
+                                System.out.println("Moving " + piece.name + "to position " + Arrays.toString(possibility) +
+                                        " will stop white from checking black");
+                                System.out.println("Current white possible moves are: " + whitePossibleMoves);
+                                System.out.println("Current amount of white possibilities are: " + whitePossibility);
+                            }
+
+                            System.out.println("Black has " + amountOfBlackStopCheck + " moves");
+                            blackKing.checkStatus = true;
+                            Board.board = Board.savedBoard;
+                            Board.boardString = Board.savedBoardString;
+                            whitePossibleMoves = savedWhitePossibleMoves;
+                            whitePossibility = savedWhitePossibility;
+                            System.out.println("Board reversed to " + Arrays.deepToString(Board.boardString));
+                            System.out.println("White possible moves reversed to " + whitePossibleMoves);
+                            System.out.println("Amount of white possibility checking the king  reversed to " + whitePossibility);
+
+                        }
+                    }
+                }
             }
         }
-        for (Pieces noLongerChecking : whiteObjectChecking) {
-            int[] objectCurrentPos = new int[2];
-            objectCurrentPos[0] = noLongerChecking.x;
-            objectCurrentPos[1] = noLongerChecking.y;
-            int[] blackKingPos = new int[2];
-            blackKingPos[0] = blackKing.x;
-            blackKingPos[1] = blackKing.y;
-            if (!noLongerChecking.isLegal(objectCurrentPos, blackKingPos)) {
-                whiteObjectChecking.remove(noLongerChecking);
-            }
-        }
-        return false;
-    }
 
-    static boolean checkMate(King thisKing) {
-        boolean checkMate = false;
-        boolean isChecked = false;
-        if (thisKing.side.equals("white")) {    //if the side is white
-            //set position of the King to every possible tile and see if it stop the check
-            //we need all the positions the King can move to
-            int[][] positions = {{thisKing.x + 1, thisKing.y + 1}, {thisKing.x - 1, thisKing.y + 1}, {thisKing.x - 1, thisKing.y - 1},
-                    {thisKing.x + 1, thisKing.y - 1}, {thisKing.x, thisKing.y + 1}, {thisKing.x + 1, thisKing.y}, {thisKing.x - 1, thisKing.y},
-                    {thisKing.x, thisKing.y - 1}};
-            //a loop that sets the King to every position, se if check is still valid, and return it to the original spot
+        blackTotalPossibility = AmountOfBlackKingPossibleMoves + amountOfBlackStopCheck;
+        whiteTotalPossibility = AmountOfWhiteKingPossibleMoves + amountOfWhiteStopCheck;
+
+        if (blackTotalPossibility == 0 ){
+
+            gameOver = true;
+            //game over here
+
+        }else if (whiteTotalPossibility == 0){
+
+             gameOver = true;
 
         }
-        //if the player cannot do anything to stop being checked, checkMate
-        //so I check all the moves for all the pieces and see if check returns false
 
-        return checkMate;
+        return gameOver;
+
     }
 
 }
+
 
 abstract class Pieces {
     // the first value will be x and the second y
@@ -311,6 +540,12 @@ abstract class Pieces {
     final Player thisPlayer;
     final Player enemyPlayer;
     protected int y;
+
+    int[] getCurrentPos() {
+
+        return new int[]{x, y};
+
+    }
 
     //Constructor to initialize a chess piece
     Pieces(int[] position, String name, Player thisPlayer, Player enemyPlayer) { //essentially the position will be an array too, with x and y.
@@ -347,7 +582,7 @@ abstract class Pieces {
                 this.y = targetY;
                 if (Board.Occupied(targetX, targetY)) {  //if the target is not empty
                     enemyPlayer.piecesDead.add(Board.boardString[targetY][targetX]);
-                    enemyPlayer.piecesAlive.remove(Board.boardString[targetY][targetX]);
+                    enemyPlayer.piecesAlive.remove(Board.board[targetY][targetX]);
                     //if no longer being checked, break out of the loop
                 }
             }
@@ -365,7 +600,7 @@ abstract class Pieces {
                 this.y = targetY;
                 if (Board.Occupied(targetX, targetY)) {
                     enemyPlayer.piecesDead.add(Board.boardString[targetY][targetX]);
-                    enemyPlayer.piecesAlive.remove(Board.boardString[targetY][targetX]);
+                    enemyPlayer.piecesAlive.remove(Board.board[targetY][targetX]);
                 }
             }
         }
@@ -378,25 +613,41 @@ abstract class Pieces {
 
 class Player {
     protected final String playerName;    //Sets the player name
-    final String[] pieces;
     String side;
-    /*
-    write pieces alive, dead and taken with arraylist so that it can be used by pieces
-     */
-    ArrayList<String> piecesAlive = new ArrayList<>();
+
+    ArrayList<Pieces> pieces = new ArrayList<>();
+    ArrayList<Pieces> piecesAlive = new ArrayList<>();
     ArrayList<String> piecesDead = new ArrayList<>();
 
-    Player(String playerName, String side, String[] pieces) {
+    public ArrayList<Pieces> getPieces() {
+        return pieces;
+    }
+
+    public void setPieces(ArrayList<Pieces> pieces) {
+        this.pieces = pieces;
+    }
+
+    public ArrayList<Pieces> getPiecesAlive() {
+        return piecesAlive;
+    }
+
+    public void setPiecesAlive(ArrayList<Pieces> piecesAlive) {
+        this.piecesAlive = piecesAlive;
+    }
+
+    /*
+            write pieces alive, dead and taken with arraylist so that it can be used by pieces
+             */
+
+
+    Player(String playerName, String side) {
         this.playerName = playerName;
         this.side = side;
-        this.pieces = pieces;
+
         //Decides white or black
     }
 
 
-    void setPiecesAlive(String[] pieces) {
-        Collections.addAll(piecesAlive, pieces);
-    }
 
     /*
     Turns
@@ -414,6 +665,9 @@ class Board {
      * board is going to be changed
      * - How does one object exist in an array?
      */
+    static int[][] savedBoard;
+    static String[][] savedBoardString;
+
     static int[][] board = {
             //Chess board
             //int[y][x]
@@ -436,6 +690,18 @@ class Board {
             {"[whitePawna2]", "[whitePawnb2]", "[whitePawnc2]", "[whitePawnd2]", "[whitePawne2]", "[whitePawnf2]", "[whitePawng2]", "[whitePawnh2]"},
             {"[whiteRooka1]", "[whiteKnightb1]", "[whiteBishopc1]", "[whiteQueen]", "[whiteKing]", "[whiteBishopf1]", "[whiteKnightg1]", "[whiteRookh1]"}
     };
+
+    static void setSavedBoardString(String[][] currentBoard) {
+
+        savedBoardString = currentBoard;
+
+    }
+
+    static void setSavedBoard(int[][] currentBoard) {
+
+        savedBoard = currentBoard;
+
+    }
 
     static boolean Occupied(int targetX, int targetY) {   //method to check if tile is occupied and if it is on the board
         //need object from board
