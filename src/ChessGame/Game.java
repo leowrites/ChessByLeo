@@ -10,14 +10,10 @@ public class Game {
     /*
      * Chess project
      * STARTED 2020-11-24
-     * COMPLETED 2020-
-     * AUTHOR Leo
+     * COMPLETED 2020-12-07
+     * AUTHOR Leo Liu
      * Write a functional chess engine
      * <p>
-     * 2020-12-08
-     * TODO:
-     *      Begin check and checkmate mechanism - Done
-     *      Implement the check and debug the methods
      * 2020-12-06
      * TODO:
      *      Rewrite code for turns, specifically in setPosition() - done
