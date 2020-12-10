@@ -1,7 +1,8 @@
 # ChessByLeo
 Reflection
-This is a project I began writting in the week after IT 12 started. I started on Nov 24th, 2020, and finished the game on Dec 07, 2020. 
-I spent around 40-45 hours during the two weeks outside of school.
+This is a project I began writting in the week after IT for Grade 12 started. I started on Nov 24th, 2020, and finished the game on Dec 07, 2020. 
+I spent around 40-45 hours during the two weeks outside of school. I have been ahead of the rest of the class and finished all the lessons within
+the first week. So I challenged myself to write a chess game.
 When I began the project I only had basic knowledge about java, and I had to learn a lot of things along the way.
 For example, I did not know how to import and image, what kind of types of images there are, or how to use JFrame to present the game.
 I was not really familiar with working with classes and objects, and I had no idea how to learn a new library.
